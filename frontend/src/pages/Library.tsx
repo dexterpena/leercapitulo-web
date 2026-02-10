@@ -13,6 +13,12 @@ interface LibraryEntry {
 }
 
 const STATUS_OPTIONS = ["reading", "completed", "plan_to_read", "dropped"];
+const STATUS_LABELS: Record<string, string> = {
+  reading: "Reading",
+  completed: "Completed",
+  plan_to_read: "Plan to Read",
+  dropped: "Dropped",
+};
 
 export default function Library() {
   const { user, loading: authLoading } = useAuth();
@@ -66,7 +72,7 @@ export default function Library() {
             className={`btn btn-sm ${filter === s ? "active" : ""}`}
             onClick={() => setFilter(s)}
           >
-            {s.replace("_", " ")} ({entries.filter((e) => e.status === s).length})
+            {STATUS_LABELS[s] || s} ({entries.filter((e) => e.status === s).length})
           </button>
         ))}
       </div>
@@ -98,7 +104,7 @@ export default function Library() {
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
-                      {s.replace("_", " ")}
+                      {STATUS_LABELS[s] || s}
                     </option>
                   ))}
                 </select>

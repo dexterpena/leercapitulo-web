@@ -45,8 +45,19 @@ export default function ReaderViewer({ images, onPageChange }: Props) {
       </div>
       <div className="reader-controls">
         <button onClick={prev} disabled={currentPage === 0}>
-          Previous
+          Prev
         </button>
+        <select
+          className="reader-page-select"
+          value={currentPage}
+          onChange={(e) => goTo(Number(e.target.value))}
+        >
+          {images.map((_, i) => (
+            <option key={i} value={i}>
+              Page {i + 1}
+            </option>
+          ))}
+        </select>
         <span className="reader-page-info">
           {currentPage + 1} / {images.length}
         </span>

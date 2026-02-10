@@ -24,9 +24,22 @@ create table if not exists anilist_tokens (
   anilist_username text
 );
 
+-- Chapter status: track read/bookmark per chapter per user
+create table if not exists chapter_status (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  manga_url text not null,
+  chapter_url text not null,
+  is_read boolean not null default false,
+  is_bookmarked boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique(user_id, chapter_url)
+);
+
 -- Enable Row Level Security
 alter table library enable row level security;
 alter table anilist_tokens enable row level security;
+alter table chapter_status enable row level security;
 
 -- RLS policies: users can only access their own data
 create policy "Users can view own library" on library
@@ -51,4 +64,16 @@ create policy "Users can update own anilist tokens" on anilist_tokens
   for update using (auth.uid() = user_id);
 
 create policy "Users can delete own anilist tokens" on anilist_tokens
+  for delete using (auth.uid() = user_id);
+
+create policy "Users can view own chapter status" on chapter_status
+  for select using (auth.uid() = user_id);
+
+create policy "Users can insert own chapter status" on chapter_status
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users can update own chapter status" on chapter_status
+  for update using (auth.uid() = user_id);
+
+create policy "Users can delete own chapter status" on chapter_status
   for delete using (auth.uid() = user_id);

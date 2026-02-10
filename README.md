@@ -1,4 +1,4 @@
-# LeerCapitulo Web
+# FiebreReader
 
 A manga reading web application that scrapes [leercapitulo.co](https://www.leercapitulo.co) with user accounts, personal library tracking, Anilist sync, an ebook-style reader, and PDF chapter downloads.
 
@@ -14,11 +14,13 @@ A manga reading web application that scrapes [leercapitulo.co](https://www.leerc
 
 - **Browse manga** — popular, latest updates, and search
 - **Manga details** — cover, author, genres, status, full chapter list
-- **Online reader** — ebook-style page-by-page viewer with keyboard/click navigation
+- **Online reader** — ebook-style page-by-page viewer with keyboard/click navigation and page selector
 - **PDF download** — download any chapter as a PDF
 - **User accounts** — signup/login via Supabase Auth
 - **Personal library** — save manga, track reading progress, filter by status (reading, completed, plan to read, dropped)
+- **Chapter tracking** — mark chapters as viewed, bookmark chapters, mark all previous as viewed
 - **Anilist integration** — link your Anilist account, auto-sync chapter progress, import your manga list
+- **Theme support** — light and dark mode toggle
 
 ## Setup
 
@@ -106,3 +108,7 @@ npm run dev
 | POST | `/api/anilist/exchange-code` | Exchange OAuth code |
 | GET | `/api/anilist/status` | Check Anilist link status |
 | POST | `/api/anilist/sync` | Sync progress to Anilist |
+| GET | `/api/chapters/status` | Get chapter read/bookmark status |
+| POST | `/api/chapters/mark-read` | Mark chapter as read |
+| POST | `/api/chapters/bookmark` | Bookmark a chapter |
+| POST | `/api/chapters/mark-previous-read` | Mark all previous chapters as read |

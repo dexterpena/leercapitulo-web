@@ -33,6 +33,21 @@ CHAPTER_NUMBER_RE = re.compile(
 )
 
 
+TITLE_SUFFIXES = [
+    " - Read Manga Online leercapitulo.co",
+    " - Leer Manga Online leercapitulo.co",
+    " - leercapitulo.co",
+]
+
+
+def _clean_title(title: str) -> str:
+    """Remove site suffixes from a title string."""
+    for suffix in TITLE_SUFFIXES:
+        if title.endswith(suffix):
+            title = title[: -len(suffix)]
+    return title.strip()
+
+
 def _abs_url(url: str) -> str:
     """Ensure a URL is absolute."""
     if not url:
@@ -129,7 +144,7 @@ def _parse_manga_list(soup: BeautifulSoup) -> list[dict]:
 
         mangas.append({
             "url": href,
-            "title": link.get_text(strip=True),
+            "title": _clean_title(link.get_text(strip=True)),
             "thumbnail": thumbnail,
         })
 
@@ -187,7 +202,7 @@ async def get_manga_detail(manga_url: str) -> dict:
     title_el = soup.select_one("h1, .manga-title, meta[property='og:title']")
     title = ""
     if title_el:
-        title = title_el.get_text(strip=True) or title_el.get("content", "")
+        title = _clean_title(title_el.get_text(strip=True) or title_el.get("content", ""))
 
     # Cover — try several selectors in priority order
     cover = ""
@@ -233,7 +248,12 @@ async def get_manga_detail(manga_url: str) -> dict:
                 description = text
                 break
 
-    # Genres
+    # Genres — filter out non-genre categories (status labels, types, etc.)
+    NON_GENRE_WORDS = {
+        "manga", "manhwa", "manhua", "novel", "one shot", "oneshot",
+        "ongoing", "completed", "hiatus", "cancelled", "en curso",
+        "finalizado", "publicándose", "cancelado",
+    }
     genre_els = soup.select(
         '.genres a, .generos a, span.genre, a[href*="genero"], a[href*="genre"]'
     )
@@ -241,6 +261,7 @@ async def get_manga_detail(manga_url: str) -> dict:
     if not genres:
         genre_els = soup.select('a[href*="Action"], a[href*="Adventure"], a[href*="Comedy"]')
         genres = [g.get_text(strip=True) for g in genre_els]
+    genres = [g for g in genres if g.lower() not in NON_GENRE_WORDS]
 
     # Status
     status_el = soup.select_one(
