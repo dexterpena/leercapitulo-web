@@ -48,7 +48,7 @@ async def _recalc_progress(user_id: str, manga_url: str):
     # Check if library entry exists
     lib_result = (
         sb.table("library")
-        .select("id, anilist_media_id, current_chapter")
+        .select("id, anilist_media_id, current_chapter, status")
         .eq("user_id", user_id)
         .eq("manga_url", manga_url)
         .execute()
@@ -56,13 +56,24 @@ async def _recalc_progress(user_id: str, manga_url: str):
 
     if lib_result.data:
         entry = lib_result.data[0]
-        sb.table("library").update(
-            {"current_chapter": max_chapter, "updated_at": "now()"}
-        ).eq("id", entry["id"]).execute()
+        updates = {"current_chapter": max_chapter, "updated_at": "now()"}
+
+        # If manga was completed but a chapter was unmarked, change to reading
+        old_status = entry.get("status", "reading")
+        old_chapter = entry.get("current_chapter", 0) or 0
+        if old_status == "completed" and max_chapter < old_chapter:
+            updates["status"] = "reading"
+
+        sb.table("library").update(updates).eq("id", entry["id"]).execute()
 
         # Sync to Anilist if linked
         if entry.get("anilist_media_id") and max_chapter > 0:
-            await _sync_anilist(sb, user_id, entry["anilist_media_id"], int(max_chapter))
+            anilist_status = updates.get("status", old_status)
+            anilist_status_map = {"reading": "reading", "completed": "completed",
+                                  "on_hold": "paused", "dropped": "dropped",
+                                  "plan_to_read": "plan_to_read"}
+            await _sync_anilist(sb, user_id, entry["anilist_media_id"],
+                                int(max_chapter), anilist_status_map.get(anilist_status, "reading"))
     elif max_chapter > 0:
         # Auto-add to library if not present
         # Get manga title from scraper
@@ -87,8 +98,8 @@ async def _recalc_progress(user_id: str, manga_url: str):
         ).execute()
 
 
-async def _sync_anilist(sb, user_id: str, media_id: int, progress: int):
-    """Push progress to Anilist."""
+async def _sync_anilist(sb, user_id: str, media_id: int, progress: int, status: str = "reading"):
+    """Push progress and status to Anilist."""
     try:
         token_result = (
             sb.table("anilist_tokens")
@@ -98,7 +109,7 @@ async def _sync_anilist(sb, user_id: str, media_id: int, progress: int):
         )
         if token_result.data:
             await anilist.update_progress(
-                media_id, progress, "reading",
+                media_id, progress, status,
                 token_result.data[0]["access_token"],
             )
     except Exception as e:

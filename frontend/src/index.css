@@ -225,8 +225,10 @@ img {
   background: var(--danger-hover);
 }
 .btn.active {
-  background: var(--accent-hover);
-  font-weight: 600;
+  background: #fff;
+  color: #1a0a08;
+  font-weight: 700;
+  border-color: #fff;
 }
 .btn-outline {
   background: transparent;

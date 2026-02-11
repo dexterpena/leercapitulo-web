@@ -12,10 +12,11 @@ interface LibraryEntry {
   current_chapter: number;
 }
 
-const STATUS_OPTIONS = ["reading", "completed", "plan_to_read", "dropped"];
+const STATUS_OPTIONS = ["reading", "completed", "on_hold", "plan_to_read", "dropped"];
 const STATUS_LABELS: Record<string, string> = {
   reading: "Reading",
   completed: "Completed",
+  on_hold: "On Hold",
   plan_to_read: "Plan to Read",
   dropped: "Dropped",
 };
@@ -38,7 +39,7 @@ function cleanTitle(title: string): string {
 export default function Library() {
   const { user, loading: authLoading } = useAuth();
   const [entries, setEntries] = useState<LibraryEntry[]>([]);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("reading");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,8 +56,10 @@ export default function Library() {
     filter === "all" ? entries : entries.filter((e) => e.status === filter);
 
   const updateStatus = async (id: string, status: string) => {
-    await api(`/api/library/${id}`, {
-      method: "PATCH",
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+    await api(`/api/library/${id}/status`, {
+      method: "POST",
       body: JSON.stringify({ status }),
     });
     setEntries((prev) =>

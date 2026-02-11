@@ -70,7 +70,6 @@ Create a `.env.local` file in the `frontend/` directory:
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_API_URL=http://localhost:8000
 ```
 
 Start the dev server:

@@ -89,7 +89,7 @@ export default function Settings() {
       }>("/api/anilist/import", { method: "POST" });
       let msg = `Imported ${data.imported} manga into your library.`;
       if (data.not_found > 0) {
-        msg += `\n${data.not_found} not found on LeerCapitulo:\n${data.not_found_titles.join(", ")}`;
+        msg += `\n${data.not_found} not found on FiebreReader:\n${data.not_found_titles.join(", ")}`;
       }
       alert(msg);
     } catch (err: unknown) {

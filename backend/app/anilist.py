@@ -143,6 +143,7 @@ async def update_progress(
     status_map = {
         "reading": "CURRENT",
         "completed": "COMPLETED",
+        "on_hold": "PAUSED",
         "plan_to_read": "PLANNING",
         "dropped": "DROPPED",
         "paused": "PAUSED",

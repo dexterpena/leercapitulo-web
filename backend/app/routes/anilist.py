@@ -127,7 +127,7 @@ async def import_from_anilist(user=Depends(get_current_user)):
         "COMPLETED": "completed",
         "PLANNING": "plan_to_read",
         "DROPPED": "dropped",
-        "PAUSED": "reading",
+        "PAUSED": "on_hold",
         "REPEATING": "reading",
     }
 
