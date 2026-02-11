@@ -1,8 +1,8 @@
-FROM python:3.13-slim
+FROM python:3.13-bookworm
 
 WORKDIR /app
 
-# Install system dependencies for lxml, Pillow, and Playwright
+# Install system dependencies for lxml, Pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libxml2-dev \
@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
-RUN playwright install --with-deps chromium
+# Install Playwright Chromium and its OS dependencies
+RUN playwright install chromium && playwright install-deps chromium
 
 COPY app/ app/
 
